@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/GabrielDVpereira/RobotYT/issues"
   },
-  "homepage": "https://github.com/GabrielDVpereira/RobotYT#readme"
+  "homepage": "https://github.com/GabrielDVpereira/RobotYT#readme",
+  "dependencies": {
+    "readline-sync": "^1.4.10"
+  }
 }
