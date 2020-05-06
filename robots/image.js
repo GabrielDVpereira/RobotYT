@@ -3,6 +3,7 @@ const google = require("googleapis").google;
 const customSearch = google.customsearch("v1");
 const googleSearchCredentials = require("../credentials/google-images.json");
 const imageDownloader = require("image-downloader");
+const path = require("path");
 
 async function robot() {
   const content = state.load();
@@ -42,6 +43,7 @@ async function robot() {
 
       for (let imageIndex = 0; imageIndex < images.length; imageIndex++) {
         const imageUrl = images[imageIndex];
+        console.log(imageUrl);
 
         try {
           if (content.downloadedImages.includes(imageUrl)) {
@@ -63,7 +65,7 @@ async function robot() {
   async function downLoadAndSave(url, filename) {
     return imageDownloader.image({
       url,
-      dest: `./content/${filename}`,
+      dest: path.resolve(__dirname, "..", "files", filename),
     });
   }
 }
