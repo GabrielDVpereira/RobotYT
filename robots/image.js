@@ -4,12 +4,15 @@ const customSearch = google.customsearch("v1");
 const googleSearchCredentials = require("../credentials/google-images.json");
 const imageDownloader = require("image-downloader");
 const path = require("path");
+const gm = require("gm").subClass({ imageMagick: true });
 
 async function robot() {
   const content = state.load();
   // await fetchImagesOfAllSentences(content);
-  await downloadAllImages(content);
+  // await downloadAllImages(content);
   // state.save(content);
+
+  await convertAllImages(content);
 
   async function fetchImagesOfAllSentences(content) {
     for (const sentence of content.sentences) {
@@ -68,5 +71,64 @@ async function robot() {
       dest: path.resolve(__dirname, "..", "files", filename),
     });
   }
+}
+
+async function convertAllImages(content) {
+  for (
+    let sentenceIndex = 0;
+    sentenceIndex <= content.sentences.length;
+    sentenceIndex++
+  ) {
+    await convertImage(sentenceIndex);
+  }
+}
+
+async function convertImage(sentenceIndex) {
+  return new Promise((resolve, reject) => {
+    const inputFile = path.resolve(
+      __dirname,
+      "..",
+      "files",
+      `${sentenceIndex}-original.png[0]`
+    );
+    const outputFile = path.resolve(
+      __dirname,
+      "..",
+      "files",
+      `${sentenceIndex}-converted.png`
+    );
+
+    const width = 1920;
+    const height = 1080;
+
+    gm()
+      .in(inputFile)
+      .out("(")
+      .out("-clone")
+      .out("0")
+      .out("-background", "white")
+      .out("-blur", "0x9")
+      .out("-resize", `${width}x${height}^`)
+      .out(")")
+      .out("(")
+      .out("-clone")
+      .out("0")
+      .out("-background", "white")
+      .out("-resize", `${width}x${height}`)
+      .out(")")
+      .out("-delete", "0")
+      .out("-gravity", "center")
+      .out("-compose", "over")
+      .out("-composite")
+      .out("-extent", `${width}x${height}`)
+      .write(outputFile, (error) => {
+        if (error) {
+          return reject(error);
+        }
+
+        console.log(`> [video-robot] Image converted: ${outputFile}`);
+        resolve();
+      });
+  });
 }
 module.exports = robot;
